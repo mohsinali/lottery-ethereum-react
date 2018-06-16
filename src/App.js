@@ -6,17 +6,26 @@ import lottery from './lottery'
 import './App.css';
 
 class App extends Component {
-  constructor(props) {
-    super(props)
+  state = {
+    manager:  '',
+    players:  [],
+    balance:  '',
+    value:    ''
+  }
 
-    this.state = {manager: ''}
+  onSubmit = async (e) => {
+    e.preventDefault()
+    
   }
   
-  async componentDidMount() {
+  componentDidMount = async () =>  {
     const manager = await lottery.methods.manager().call()
-    
-    this.setState({manager})
+    const players = await lottery.methods.getPlayers().call()
+    const balance = await web3.eth.getBalance(lottery.options.address)
+
+    this.setState({manager, players, balance})
   }
+
   render() {    
     return (
       <div>
@@ -24,6 +33,22 @@ class App extends Component {
         <p>
           This contract is managed by {this.state.manager}
         </p>
+
+        <p>There are currently {this.state.players.length} entered completing to win {web3.utils.fromWei(this.state.balance, 'ether')} ether!</p>
+      
+        <hr />
+        <form name="entry" onSubmit={this.onSubmit}>
+          <h4>Wanna try your luck?</h4>
+
+          <div>
+            <label>Amount of ether to enter: </label>
+            <input 
+              value={this.state.value}
+              onChange={event => this.setState({value: event.target.value})}
+            />
+          </div>
+          <button>Enter</button>
+        </form>
       </div>
     );
   }
